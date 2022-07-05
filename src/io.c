@@ -63,7 +63,7 @@ int open_serial(const char* path, unsigned long bauds) {
     tty.c_lflag &= ~ICANON;
     tty.c_lflag &= ~ISIG;
     tty.c_iflag &= ~(IXON | IXOFF | IXANY);
-    tty.c_iflag &= ~(IGNBRK| BRKINT| PARMRK| ISTRIP| INLCR| IGNCR| ICRNL);
+    tty.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL);
     tty.c_oflag &= ~OPOST;
     tty.c_oflag &= ~ONLCR;
     tty.c_cc[VMIN] = 1;
