@@ -16,7 +16,7 @@ void help() {
     }
 
     // Print the help
-    printf("Usage: serialio <devicefile> <baudrate>\n");
+    printf("Usage: spipe <devicefile> <baudrate>\n");
     printf("\n");
     exit(errno);
 }
