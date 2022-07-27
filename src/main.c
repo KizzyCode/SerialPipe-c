@@ -27,7 +27,7 @@ void help() {
  * 
  * @param signum The signal number
  */
-void ctrlc(int signum) {
+void ctrl_c(int signum) {
     // Drop arguments and define message
     (void)signum;
     const char message[] = "Received interrupt - stopping...\n";
@@ -81,8 +81,8 @@ void* copy_loop(void* args_ptr) {
 
 int main(int argc, char** argv) {
     // Register signal handlers
-    signal(SIGINT, ctrlc);
-    signal(SIGTERM, ctrlc);
+    signal(SIGINT, ctrl_c);
+    signal(SIGTERM, ctrl_c);
 
     // Validate the arguments
     if (argc < 3) {
