@@ -1,8 +1,8 @@
 CC?=cc
 PREFIX?=/usr/local
+CFLAGS?=-Wall -Wextra -Werror -O3
+LDFLAGS?=-lpthread
 
-CFLAGS=-Wall -Wextra -Werror -O3
-LDFLAGS=-lpthread
 OBJECTS=src/main.o src/io.o
 TARGET=spipe
 
