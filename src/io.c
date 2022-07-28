@@ -97,25 +97,31 @@ int open_serial(const char* path, unsigned long bauds) {
 
 int read_one(int fd, char* buf) {
 retry:
-    // Try to read a single byte
-    switch (read(fd, buf, 1)) {
-        case 1: return 0;
-        case 0: goto retry;
-        default:
+    {
+        // Try to read a single byte
+        ssize_t read_ = read(fd, buf, 1);
+        if (read_ == 0) {
+            goto retry;
+        }
+        if (read_ < 1) {
             perror("Failed to read byte");
             return -1;
+        }
+
+        return 0;
     }
 }
 
 
 int write_one(int fd, const char* byte) {
     // Write a single byte
-    switch (write(fd, byte, 1)) {
-        case 1: break;
-        case 0: errno = EOF;
-        default:
-            perror("Failed to read byte");
-            return -1;
+    ssize_t written = write(fd, byte, 1);
+    if (written == 0) {
+        errno = EOF;
+    }
+    if (written < 1) {
+        perror("Failed to write byte");
+        return -1;
     }
 
     // Flush output
