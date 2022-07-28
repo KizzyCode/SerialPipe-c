@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "LLDB: Debug",
+            "preLaunchTask": "Make: build",
+            "program": "${workspaceFolder}/spipe",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "termios.h": "c"
+    },
+    "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools",
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "${workspaceFolder}",
+            "binaryPath": "${workspaceFolder}/spipe",
+            "binaryArgs": []
+        }
+    ]
+}
