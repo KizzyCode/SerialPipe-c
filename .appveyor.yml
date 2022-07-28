@@ -14,13 +14,13 @@ platform:
 
 
 # Configuration matrix
-configuration:
-  # - --optional-arg
+#configuration:
+#  - --optional-arg
 
 
 # General environment vars
-environment:
-  # CFLAGS: -Customflag
+#environment:
+#  CFLAGS: -Customflag
 
 
 # Fail fast if one job in the matrix fails
