@@ -32,8 +32,8 @@ void ctrl_c(int signum) {
     (void)signum;
     const char message[] = "Received interrupt - stopping...\n";
 
-    // Write an info message and terminate
-    write(STDERR_FILENO, "Received interrupt\n", sizeof(message));
+    // Write an info message (best-effort) and terminate
+    (void)write(STDERR_FILENO, "Received interrupt\n", sizeof(message));
     exit(EINTR);
 }
 
