@@ -63,19 +63,18 @@ void* copy_loop(void* args_ptr) {
 
     // Loop
     while (1) {
-        // Read from stdin
+        // Read from source
         if (read_one(args->src, &buf) != 0) {
-            perror("Failed to read from source");
-            return NULL;
+            perror("Broken pipe");
+            exit(errno);
         }
 
-        // Write to stdout
+        // Write to dest
         if (write_one(args->dest, &buf) != 0) {
-            perror("Failed to write to destination");
-            return NULL;
+            perror("Broken pipe");
+            exit(errno);
         }
     }
-    return NULL;
 }
 
 
@@ -121,5 +120,4 @@ int main(int argc, char** argv) {
     // Wait until the threads exit
     pthread_join(to_serial, NULL);
     pthread_join(from_serial, NULL);
-    return errno;
 }
