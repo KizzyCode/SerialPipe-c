@@ -1,0 +1,60 @@
+# Since we use custom test script, disable the default build action
+build: false
+
+
+# The target platforms
+platform:
+  # Windows is not supported ATM
+  # - x86_64-pc-windows-msvc
+  # - i686-pc-windows-msvc
+  # - x86_64-pc-windows-gnu
+  # - i686-pc-windows-gnu
+  - x86_64-unknown-linux-gnu
+  - x86_64-apple-darwin
+
+
+# Configuration matrix
+configuration:
+  # - --optional-arg
+
+
+# General environment vars
+environment:
+  # CFLAGS: -Customflag
+
+
+# Fail fast if one job in the matrix fails
+matrix:
+  fast_finish: true
+
+
+for:
+  # Windows specific build settings
+  - matrix:
+      only:
+        - platform: x86_64-pc-windows-msvc
+        - platform: i686-pc-windows-msvc
+        - platform: x86_64-pc-windows-gnu
+        - platform: i686-pc-windows-gnu
+    environment:
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+    test_script:
+      - make
+  
+  # Linux specific build settings
+  - matrix:
+      only:
+        - platform: x86_64-unknown-linux-gnu
+    environment:
+      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
+    test_script:
+      - make
+  
+  # macOS specific build settings
+  - matrix:
+      only:
+        - platform: x86_64-apple-darwin
+    environment:
+      APPVEYOR_BUILD_WORKER_IMAGE: macOS
+    test_script:
+      - make
