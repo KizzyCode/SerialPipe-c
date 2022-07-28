@@ -53,22 +53,39 @@ int open_serial(const char* path, unsigned long bauds) {
         return -1;
     }
 
-    // Create an attribute mask
+    // Disable parity generation on output and parity checking for input
     tty.c_cflag &= ~PARENB;
+    // Set one stop bit instead of two
     tty.c_cflag &= ~CSTOPB;
+    // Use eight bit characters
     tty.c_cflag &= ~CSIZE;
     tty.c_cflag |= CS8;
+    // Disable hardware flow control
     tty.c_cflag &= ~CRTSCTS;
-    tty.c_cflag |= CREAD | CLOCAL;
+    // Enable receiving
+    tty.c_cflag |= CREAD;
+    // Ignore modem control lines
+    tty.c_cflag |= CLOCAL;
+    // Disable canonical mode
     tty.c_lflag &= ~ICANON;
+    // Disable INTR, QUIT, SUSP, or DSUSP signals
     tty.c_lflag &= ~ISIG;
-    tty.c_iflag &= ~(IXON | IXOFF | IXANY);
+    // Disable XON/XOFF
+    tty.c_iflag &= ~(IXON | IXOFF);
+    // Just allow the START character to restart output
+    tty.c_iflag &= ~IXANY;
+    // Disable special handling of various signals and parity-errors
     tty.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL);
+    // Disable implementation-defined output processing
     tty.c_oflag &= ~OPOST;
+    // Don't map NL to CR-NL on output
     tty.c_oflag &= ~ONLCR;
+    // Minimum number of characters for noncanonical read
     tty.c_cc[VMIN] = 1;
+    // Timeout in deciseconds for noncanonical read
     tty.c_cc[VTIME] = 0;
     
+    // Apply the updated TTY settings
     if (tcsetattr(devfile, TCSANOW, &tty) != 0) {
         perror("Failed to set attributes");
         return -1;
