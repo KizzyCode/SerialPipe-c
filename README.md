@@ -17,7 +17,7 @@ spipe /dev/tty.usbmodem21201 115200
 echo "Testolope" | spipe /dev/tty.usbmodem21201 115200
 
 # Dump /dev/tty.usbmodem21201 @9600 to the file a.out
-spipe /dev/tty.usbmodem666 9600 > a.out
+spipe /dev/tty.usbmodem21201 9600 > a.out
 ```
 
 ## Usage
