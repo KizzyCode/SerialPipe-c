@@ -33,7 +33,7 @@ void ctrl_c(int signum) {
     const char message[] = "Received interrupt - stopping...\n";
 
     // Write an info message as best-effort approach and terminate
-    ssize_t written = write(STDERR_FILENO, "Received interrupt\n", sizeof(message));
+    ssize_t written = write(STDERR_FILENO, message, sizeof(message));
     (void)written;
     exit(EINTR);
 }
