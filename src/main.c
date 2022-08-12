@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <errno.h>
+#include <string.h>
 #include <signal.h>
 #include <pthread.h>
 #include <stdlib.h>
@@ -44,6 +45,10 @@ void ctrl_c(int signum) {
  */
 struct copy_loop_args {
     /**
+     * @brief The name of the copy loop
+     */
+    const char* name;
+    /**
      * @brief The source file descriptor
      */
     int src;
@@ -66,13 +71,13 @@ void* copy_loop(void* args_ptr) {
     while (1) {
         // Read from source
         if (read_one(args->src, &buf) != 0) {
-            perror("Broken pipe");
+            fprintf(stderr, "Broken pipe for %s: %s\n", args->name, strerror(errno));
             exit(errno);
         }
 
         // Write to dest
         if (write_one(args->dest, &buf) != 0) {
-            perror("Broken pipe");
+            fprintf(stderr, "Broken pipe for %s: %s\n", args->name, strerror(errno));
             exit(errno);
         }
     }
@@ -106,8 +111,8 @@ int main(int argc, char** argv) {
 
     // Start I/O
     pthread_t to_serial, from_serial;
-    struct copy_loop_args to_serial_args = { .src = STDIN_FILENO, .dest = devfile };
-    struct copy_loop_args from_serial_args = { .src = devfile, .dest = STDOUT_FILENO };
+    struct copy_loop_args to_serial_args = { .name = "stdin->serial", .src = STDIN_FILENO, .dest = devfile };
+    struct copy_loop_args from_serial_args = { .name = "serial->stdin", .src = devfile, .dest = STDOUT_FILENO };
 
     if ((errno = pthread_create(&to_serial, NULL, copy_loop, &to_serial_args)) != 0) {
         perror("Failed to spawn stdin->serial thread");
