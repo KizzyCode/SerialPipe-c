@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
     // Start I/O
     pthread_t to_serial, from_serial;
     struct copy_loop_args to_serial_args = { .name = "stdin->serial", .src = STDIN_FILENO, .dest = devfile };
-    struct copy_loop_args from_serial_args = { .name = "serial->stdin", .src = devfile, .dest = STDOUT_FILENO };
+    struct copy_loop_args from_serial_args = { .name = "serial->stdout", .src = devfile, .dest = STDOUT_FILENO };
 
     if ((errno = pthread_create(&to_serial, NULL, copy_loop, &to_serial_args)) != 0) {
         perror("Failed to spawn stdin->serial thread");
