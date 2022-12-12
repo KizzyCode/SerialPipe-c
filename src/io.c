@@ -44,12 +44,8 @@ int open_serial(const char* path, unsigned long bauds) {
     }
 
     // Set the speed
-    if (cfsetispeed(&tty, bauds) != 0) {
-        perror("Failed to set input baudrate");
-        return -1;
-    }
-    if (cfsetospeed(&tty, bauds) != 0) {
-        perror("Failed to set output baudrate");
+    if (cfsetspeed(&tty, bauds) != 0) {
+        perror("Failed to set baudrate");
         return -1;
     }
 
@@ -121,12 +117,6 @@ int write_one(int fd, const char* byte) {
     }
     if (written < 1) {
         perror("Failed to write byte");
-        return -1;
-    }
-
-    // Flush output
-    if (fsync(fd) != 0) {
-        perror("Failed to write data");
         return -1;
     }
 
