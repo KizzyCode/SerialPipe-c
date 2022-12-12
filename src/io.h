@@ -29,7 +29,7 @@ int open_serial(const char* path, unsigned long bauds);
  * 
  * @param fd The file descriptor to write to
  * @param buf The target buffer
- * @return `0` or `-1` on success
+ * @return `0` or `-1` on error
  */
 int read_one(int fd, char* buf);
 
@@ -39,7 +39,7 @@ int read_one(int fd, char* buf);
  * 
  * @param fd The file descriptor to write to
  * @param byte The byte to write
- * @return `0` or `-1` on success
+ * @return `0` or `-1` on error
  */
 int write_one(int fd, const char* byte);
 
