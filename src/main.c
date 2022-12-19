@@ -13,12 +13,12 @@
 void help() {
     // Print the errno
     if (errno != 0) {
-        perror("Fatal error");
+        perror("fatal error");
     }
 
     // Print the help
-    printf("Usage: spipe <devicefile> <baudrate>\n");
-    printf("\n");
+    fprintf(stderr, "Usage: spipe <devicefile> <baudrate>\n");
+    fprintf(stderr, "\n");
     exit(errno);
 }
 
@@ -31,7 +31,7 @@ void help() {
 void ctrl_c(int signum) {
     // Drop arguments and define message
     (void)signum;
-    const char message[] = "Received interrupt - stopping...\n";
+    const char message[] = "stopping due to interrupt...\n";
 
     // Write an info message as best-effort approach and terminate
     ssize_t written = write(STDERR_FILENO, message, sizeof(message));
@@ -65,19 +65,19 @@ struct copy_loop_args {
 void* copy_loop(void* args_ptr) {
     // Get the dev file and create buffer
     struct copy_loop_args* args = (struct copy_loop_args*)args_ptr;
-    char buf;
+    iobuf_t buf = { 0 };
 
     // Loop
     while (1) {
         // Read from source
-        if (read_one(args->src, &buf) != 0) {
-            fprintf(stderr, "Broken pipe for %s: %s\n", args->name, strerror(errno));
+        if (fill_buf(&buf, args->src) != 0) {
+            fprintf(stderr, "broken pipe for %s: %s\n", args->name, strerror(errno));
             exit(errno);
         }
 
         // Write to dest
-        if (write_one(args->dest, &buf) != 0) {
-            fprintf(stderr, "Broken pipe for %s: %s\n", args->name, strerror(errno));
+        if (flush_buf(args->dest, &buf) != 0) {
+            fprintf(stderr, "broken pipe for %s: %s\n", args->name, strerror(errno));
             exit(errno);
         }
     }
@@ -88,6 +88,7 @@ int main(int argc, char** argv) {
     // Register signal handlers
     signal(SIGINT, ctrl_c);
     signal(SIGTERM, ctrl_c);
+    signal(SIGPIPE, SIG_IGN);
 
     // Validate the arguments
     if (argc < 3) {
@@ -98,14 +99,14 @@ int main(int argc, char** argv) {
     // Parse the baudrate
     unsigned long baudrate;
     if (parse_long(argv[2], &baudrate) != 0) {
-        perror("Invalid baudrate");
+        perror("invalid baudrate");
         exit(errno);
     }
 
     // Open the serial file
     int devfile = open_serial(argv[1], baudrate);
     if (devfile < 0) {
-        perror("Failed to open device file");
+        perror("failed to open device file");
         exit(errno);
     }
 
@@ -115,11 +116,11 @@ int main(int argc, char** argv) {
     struct copy_loop_args from_serial_args = { .name = "serial->stdout", .src = devfile, .dest = STDOUT_FILENO };
 
     if ((errno = pthread_create(&to_serial, NULL, copy_loop, &to_serial_args)) != 0) {
-        perror("Failed to spawn stdin->serial thread");
+        perror("failed to spawn stdin->serial thread");
         exit(errno);
     }
     if ((errno = pthread_create(&from_serial, NULL, copy_loop, &from_serial_args)) != 0) {
-        perror("Failed to spawn serial->stdout thread");
+        perror("failed to spawn serial->stdout thread");
         exit(errno);
     }
 

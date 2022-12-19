@@ -5,6 +5,21 @@
 
 
 /**
+ * @brief An I/O buffer
+ */
+typedef struct {
+    /**
+     * @brief The buffer
+     */
+    char data[4096];
+    /**
+     * @brief The amount of bytes within the buffer
+     */
+    int filled;
+} iobuf_t;
+
+
+/**
  * @brief Parses a string into a long
  * 
  * @param str The string to parse
@@ -25,23 +40,22 @@ int open_serial(const char* path, unsigned long bauds);
 
 
 /**
- * @brief Reads one byte from `fd`
+ * @brief Reads as much bytes as possible within a single call; retries if the read was empty
  * 
- * @param fd The file descriptor to write to
- * @param buf The target buffer
- * @return `0` or `-1` on error
+ * @param buf The target buffer to read into
+ * @param fd The file descriptor to read from
+ * @return `0` or `-1` on error 
  */
-int read_one(int fd, char* buf);
+int fill_buf(iobuf_t* buf, int fd);
 
 
 /**
- * @brief Writes one byte to `fd`
+ * @brief Writes as much bytes as possible within a single call; retries if the write was empty
  * 
  * @param fd The file descriptor to write to
- * @param byte The byte to write
- * @return `0` or `-1` on error
+ * @param buf The buffer to write to the file descriptor
+ * @return `0` or `-1` on error  
  */
-int write_one(int fd, const char* byte);
-
+int flush_buf(int fd, iobuf_t* buf);
 
 #endif // IO_H

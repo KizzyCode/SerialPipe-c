@@ -6,6 +6,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include "io.h"
+
 
 int parse_long(const char* str, unsigned long* buf) {
     // Parse string
@@ -13,7 +15,7 @@ int parse_long(const char* str, unsigned long* buf) {
     *buf = strtoul(str, &strend, 10);
     if (strlen(strend) > 0) {
         errno = EINVAL;
-        perror("Invalid number literal");
+        perror("invalid number literal");
         return -1;
     }
 
@@ -25,27 +27,27 @@ int open_serial(const char* path, unsigned long bauds) {
     // Open the device file nonblocking
     int devfile = open(path, O_RDWR | O_NONBLOCK);
     if (devfile < 0) {
-        perror("Failed to open device file");
+        perror("failed to open device file");
         return -1;
     }
 
     // Make the file blocking again
     int flags = fcntl(devfile, F_GETFL, 0);
     if (fcntl(devfile, F_SETFL, flags & ~O_NONBLOCK) != 0) {
-        perror("Failed to make serial blocking");
+        perror("failed to make serial blocking");
         return -1;
     }
 
     // Get the device attributes
     struct termios tty;
     if (tcgetattr(devfile, &tty) != 0) {
-        perror("Failed to get serial attributes");
+        perror("failed to get serial attributes");
         return -1;
     }
 
     // Set the speed
     if (cfsetspeed(&tty, bauds) != 0) {
-        perror("Failed to set baudrate");
+        perror("failed to set baudrate");
         return -1;
     }
 
@@ -83,7 +85,7 @@ int open_serial(const char* path, unsigned long bauds) {
     
     // Apply the updated TTY settings
     if (tcsetattr(devfile, TCSANOW, &tty) != 0) {
-        perror("Failed to set attributes");
+        perror("failed to set attributes");
         return -1;
     }
 
@@ -91,34 +93,57 @@ int open_serial(const char* path, unsigned long bauds) {
 }
 
 
-int read_one(int fd, char* buf) {
-retry:
-    {
-        // Try to read a single byte
-        ssize_t read_ = read(fd, buf, 1);
+int fill_buf(iobuf_t* buf, int fd) {
+    // Compute the available space and return if the buffer full
+    const size_t available = sizeof(buf->data) - buf->filled;
+    if (available == 0) {
+        return 0;
+    }
+
+    retry: {
+        // Read as much data as possible into the buffer
+        ssize_t read_ = read(fd, buf->data + buf->filled, available);
         if (read_ == 0) {
             goto retry;
         }
-        if (read_ < 1) {
-            perror("Failed to read byte");
+        if (read_ < 0) {
+            perror("failed to read data");
             return -1;
         }
 
+        // Update the buffer
+        buf->filled += read_;
         return 0;
     }
 }
 
 
-int write_one(int fd, const char* byte) {
-    // Write a single byte
-    ssize_t written = write(fd, byte, 1);
-    if (written == 0) {
-        errno = EOF;
-    }
-    if (written < 1) {
-        perror("Failed to write byte");
-        return -1;
+int flush_buf(int fd, iobuf_t* buf) {
+    // Return if the buffer is empty
+    if (buf->filled == 0) {
+        return 0;
     }
 
-    return 0;
+    retry: {
+        // Write as much data as possible
+        ssize_t written = write(fd, buf->data, buf->filled);
+        if (written == 0) {
+            goto retry;
+        }
+        if (written < 0) {
+            perror("failed to write data");
+            return -1;
+        }
+
+        // Sync the file descriptor
+        if (fd != STDOUT_FILENO && tcdrain(fd) != 0) {
+            perror("failed to sync to serial device");
+            return -1;
+        }
+
+        // Update the buffer
+        buf->filled = buf->filled - written;
+        memmove(buf->data, buf->data + written, buf->filled);
+        return 0;
+    }
 }
