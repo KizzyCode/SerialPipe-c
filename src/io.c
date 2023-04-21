@@ -147,3 +147,8 @@ int flush_buf(int fd, iobuf_t* buf) {
         return 0;
     }
 }
+
+
+void close_serial(int fd) {
+    close(fd);
+}

@@ -58,4 +58,13 @@ int fill_buf(iobuf_t* buf, int fd);
  */
 int flush_buf(int fd, iobuf_t* buf);
 
+
+/**
+ * @brief Closes a serial device file descriptor
+ * 
+ * @param fd The file descriptor to close
+ */
+void close_serial(int fd);
+
+
 #endif // IO_H
