@@ -9,46 +9,28 @@
 #include "io.h"
 
 
-int parse_long(const char* str, unsigned long* buf) {
-    // Parse string
-    char* strend = NULL;
-    *buf = strtoul(str, &strend, 10);
-    if (strlen(strend) > 0) {
-        errno = EINVAL;
-        perror("invalid number literal");
-        return -1;
-    }
-
-    return 0;
-}
-
-
-int open_serial(const char* path, uint32_t bauds) {
+int8_t open_serial(int* fd, const char* path, uint32_t bauds) {
     // Open the device file nonblocking
     int devfile = open(path, O_RDWR | O_NONBLOCK);
     if (devfile < 0) {
-        perror("failed to open device file");
-        return -1;
+        goto abort;
     }
 
     // Make the file blocking again
     int flags = fcntl(devfile, F_GETFL, 0);
     if (fcntl(devfile, F_SETFL, flags & ~O_NONBLOCK) != 0) {
-        perror("failed to make serial blocking");
-        return -1;
+        goto abort;
     }
 
     // Get the device attributes
     struct termios tty;
     if (tcgetattr(devfile, &tty) != 0) {
-        perror("failed to get serial attributes");
-        return -1;
+        goto abort;
     }
 
     // Set the speed
     if (cfsetspeed(&tty, (speed_t)bauds) != 0) {
-        perror("failed to set baudrate");
-        return -1;
+        goto abort;
     }
 
     // Disable parity generation on output and parity checking for input
@@ -85,15 +67,23 @@ int open_serial(const char* path, uint32_t bauds) {
     
     // Apply the updated TTY settings
     if (tcsetattr(devfile, TCSANOW, &tty) != 0) {
-        perror("failed to set attributes");
-        return -1;
+        goto abort;
     }
 
-    return devfile;
+    // Set fd and return success
+    *fd = devfile;
+    return 0;
+
+abort:
+    // Close device file if it has been opened
+    if (devfile >= 0) {
+        close(devfile);
+    }
+    return -1;
 }
 
 
-int fill_buf(iobuf_t* buf, int fd) {
+int8_t fill_buf(iobuf_t* buf, int fd) {
     // Compute the available space and return if the buffer full
     const size_t available = sizeof(buf->data) - buf->filled;
     if (available == 0) {
@@ -118,7 +108,7 @@ int fill_buf(iobuf_t* buf, int fd) {
 }
 
 
-int flush_buf(int fd, iobuf_t* buf) {
+int8_t flush_buf(int fd, iobuf_t* buf) {
     // Return if the buffer is empty
     if (buf->filled == 0) {
         return 0;

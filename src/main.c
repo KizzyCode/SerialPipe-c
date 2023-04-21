@@ -4,6 +4,7 @@
 #include <signal.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <inttypes.h>
 #include "io.h"
 
 
@@ -37,6 +38,31 @@ void ctrl_c(int signum) {
     ssize_t written = write(STDERR_FILENO, message, sizeof(message));
     (void)written;
     exit(EINTR);
+}
+
+
+/**
+ * @brief Parses a string into an integer
+ * 
+ * @param buf The target buffer
+ * @param str The string to parse
+ * @return `0` or `-1` in case of an error
+ */
+int parse_int(int* buf, const char* str) {
+    // Parse string
+    errno = 0;
+    char* strend = NULL;
+    *buf = strtoumax(str, &strend, 10);
+    
+    // Check for errors
+    if (errno != 0) {
+        return -1;
+    }
+    if (strlen(strend) > 0) {
+        errno = EINVAL;
+        return -1;
+    }
+    return 0;
 }
 
 
@@ -97,15 +123,15 @@ int main(int argc, char** argv) {
     }
 
     // Parse the baudrate
-    unsigned long baudrate;
-    if (parse_long(argv[2], &baudrate) != 0) {
+    int baudrate;
+    if (parse_int(&baudrate, argv[2]) != 0) {
         perror("invalid baudrate");
         exit(errno);
     }
 
     // Open the serial file
-    int devfile = open_serial(argv[1], baudrate);
-    if (devfile < 0) {
+    int devfile;
+    if (open_serial(&devfile, argv[1], (uint32_t)baudrate) < 0) {
         perror("failed to open device file");
         exit(errno);
     }

@@ -21,23 +21,14 @@ typedef struct {
 
 
 /**
- * @brief Parses a string into a long
- * 
- * @param str The string to parse
- * @param buf The target buffer
- * @return `0` or `-1` in case of an error
- */
-int parse_long(const char* str, unsigned long* buf);
-
-
-/**
  * @brief Opens a serial device file
  * 
+ * @param fd The pointer to write the newly created file descriptor into
  * @param path The path to open
  * @param bauds The baud rate to configure
- * @return The device file descriptor or `-1` in case of an error
+ * @return `0` or `-1` on error 
  */
-int open_serial(const char* path, uint32_t bauds);
+int8_t open_serial(int* fd, const char* path, uint32_t bauds);
 
 
 /**
@@ -47,7 +38,7 @@ int open_serial(const char* path, uint32_t bauds);
  * @param fd The file descriptor to read from
  * @return `0` or `-1` on error 
  */
-int fill_buf(iobuf_t* buf, int fd);
+int8_t fill_buf(iobuf_t* buf, int fd);
 
 
 /**
@@ -57,7 +48,7 @@ int fill_buf(iobuf_t* buf, int fd);
  * @param buf The buffer to write to the file descriptor
  * @return `0` or `-1` on error  
  */
-int flush_buf(int fd, iobuf_t* buf);
+int8_t flush_buf(int fd, iobuf_t* buf);
 
 
 /**
