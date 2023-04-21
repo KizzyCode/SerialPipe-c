@@ -1,6 +1,6 @@
 CC?=cc
 PREFIX?=/usr/local
-CFLAGS?=-pthread -Wall -Wextra -Werror -O3
+CFLAGS?=-pthread -Wall -Wextra -Wpedantic -Werror -O3
 LDFLAGS?=
 
 OBJECTS=src/main.o src/io.o

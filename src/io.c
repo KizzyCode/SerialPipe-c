@@ -23,7 +23,7 @@ int parse_long(const char* str, unsigned long* buf) {
 }
 
 
-int open_serial(const char* path, unsigned long bauds) {
+int open_serial(const char* path, uint32_t bauds) {
     // Open the device file nonblocking
     int devfile = open(path, O_RDWR | O_NONBLOCK);
     if (devfile < 0) {
@@ -46,7 +46,7 @@ int open_serial(const char* path, unsigned long bauds) {
     }
 
     // Set the speed
-    if (cfsetspeed(&tty, bauds) != 0) {
+    if (cfsetspeed(&tty, (speed_t)bauds) != 0) {
         perror("failed to set baudrate");
         return -1;
     }

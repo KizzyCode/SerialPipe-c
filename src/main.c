@@ -10,7 +10,7 @@
 /**
  * @brief Displays the help and exists
  */
-void help() {
+void help(void) {
     // Print the errno
     if (errno != 0) {
         perror("fatal error");

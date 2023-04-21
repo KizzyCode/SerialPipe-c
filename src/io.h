@@ -2,6 +2,7 @@
 #define IO_H
 
 #include <unistd.h>
+#include <stdint.h>
 
 
 /**
@@ -11,11 +12,11 @@ typedef struct {
     /**
      * @brief The buffer
      */
-    char data[4096];
+    uint8_t data[4096];
     /**
      * @brief The amount of bytes within the buffer
      */
-    int filled;
+    size_t filled;
 } iobuf_t;
 
 
@@ -36,7 +37,7 @@ int parse_long(const char* str, unsigned long* buf);
  * @param bauds The baud rate to configure
  * @return The device file descriptor or `-1` in case of an error
  */
-int open_serial(const char* path, unsigned long bauds);
+int open_serial(const char* path, uint32_t bauds);
 
 
 /**
