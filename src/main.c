@@ -37,7 +37,9 @@ void ctrl_c(int signum) {
     // Write an info message as best-effort approach and terminate
     ssize_t written = write(STDERR_FILENO, message, sizeof(message));
     (void)written;
-    exit(EINTR);
+
+    // Terminate with an abort (seems to work more reliable during blocking operations)
+    abort();
 }
 
 
